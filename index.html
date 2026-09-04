@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F9F8F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131A22" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Devocionario personal: ofrecimiento de la mañana, Completas de cada día y la Misa explicada paso a paso.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Horas">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<title>Horas · Devocionario</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="progreso" id="progreso"></div>
+
+<div class="panelfuente" id="panelfuente">
+  <div class="fila-aj">
+    <span class="etq">Tema</span>
+    <div class="tswitch" id="btema" role="button" aria-label="Cambiar tema"><b></b></div>
+  </div>
+  <div class="fila-aj">
+    <span class="etq">Letra</span>
+    <div class="stepper">
+      <button id="fmenos" aria-label="Reducir letra">A−</button>
+      <span class="fsval" id="fsval">100%</span>
+      <button id="fmas" aria-label="Aumentar letra">A+</button>
+    </div>
+  </div>
+</div>
+
+<div id="portada"><div class="wrap">
+  <div class="phead">
+    <span class="spacer"></span>
+    <span class="kick">Horas · Rezar y entender</span>
+    <button class="iconbtn" id="bajustes1" aria-label="Ajustes">⚙</button>
+  </div>
+  <div class="phero">
+    <div class="fecha" id="fecha"></div>
+    <svg class="cruz" viewBox="0 0 22 30"><rect x="9" y="0" width="4" height="30"/><rect x="2" y="8" width="18" height="4"/></svg>
+    <h1>Horas</h1>
+    <p class="sub">Comenzar el día en presencia de Dios.<br>Rezar, y entender lo que se reza.</p>
+    <div class="hr"><i></i><b></b><i></i></div>
+  </div>
+
+  <button class="continuar" id="continuar">
+    <span class="ic">↺</span>
+    <span class="tx"><b>Continuar</b><span id="continuartxt">Retomar donde lo dejaste</span></span>
+  </button>
+
+  <div class="puertas">
+    <button class="pta" onclick="HORAS.abrir('manana')">
+      <span class="num">01</span>
+      <span class="mid"><span class="h">Mañana</span><span class="s">Ofrecimiento del día · 8 oraciones</span></span>
+      <span class="go">→</span>
+    </button>
+    <button class="pta" onclick="HORAS.abrir('completas')">
+      <span class="num">02</span>
+      <span class="mid"><span class="h">Completas</span><span class="s" id="scomp">Oración de la noche</span></span>
+      <span class="go">→</span>
+    </button>
+    <button class="pta" onclick="HORAS.abrir('misa')">
+      <span class="num">03</span>
+      <span class="mid"><span class="h">La Misa</span><span class="s">Explicación paso a paso · 14 partes</span></span>
+      <span class="go">→</span>
+    </button>
+  </div>
+
+  <div class="pfoot">
+    <span class="kick">Ad maiorem Dei gloriam</span>
+    <button class="instalar" id="instalar" onclick="HORAS.instalar()">Instalar en el móvil</button>
+  </div>
+</div></div>
+
+<div id="oficio"><div class="wrap">
+  <div class="barra">
+    <div class="f1">
+      <button class="volver" onclick="HORAS.volver()">‹ Inicio</button>
+      <span class="tit" id="titulo"></span>
+      <button class="iconbtn" id="bindice" aria-label="Índice">☰</button>
+      <button class="iconbtn" id="bajustes2" aria-label="Ajustes">⚙</button>
+      <button class="rubtoggle" id="rt" onclick="HORAS.rubs()"><span class="pt">¶</span>Entender</button>
+    </div>
+    <div class="subfecha" id="subfecha"></div>
+  </div>
+  <div id="cuerpo"></div>
+  <div class="fin"><span>Ad maiorem Dei gloriam</span></div>
+</div></div>
+
+<div class="velo" id="velo"></div>
+<div class="hoja" id="hoja">
+  <div class="asa"></div>
+  <h2>Índice</h2>
+  <div id="listaindice"></div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
