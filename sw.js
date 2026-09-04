@@ -1,4 +1,4 @@
-var CACHE = "horas-v1";
+var CACHE = "horas-v3";
 var ASSETS = [
   "./",
   "./index.html",
@@ -9,12 +9,16 @@ var ASSETS = [
   "./fonts/Cardo-Regular.woff2",
   "./fonts/Cardo-Bold.woff2",
   "./fonts/Cardo-Italic.woff2",
+  "./fonts/PlexSans-Regular.woff2",
+  "./fonts/PlexSans-Medium.woff2",
+  "./fonts/PlexSans-SemiBold.woff2",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-maskable-192.png",
   "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png",
-  "./icons/favicon-32.png"
+  "./icons/favicon-32.png",
+  "./icons/icon.svg"
 ];
 
 self.addEventListener("install", function(e){

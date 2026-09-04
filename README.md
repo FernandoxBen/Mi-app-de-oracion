@@ -1,17 +1,17 @@
 # Horas · Devocionario
 
-App de oración personal (PWA): ofrecimiento de la mañana, Completas de cada día de la semana y la Misa explicada paso a paso. Funciona sin conexión y se instala en el móvil como una app normal.
+App de oración personal (PWA): ofrecimiento de la mañana, Completas de cada día de la semana y la Misa explicada paso a paso. Se instala en el móvil como una app normal y funciona sin conexión.
 
 ## Publicar en GitHub Pages
 
-**Opción rápida (sin usar la terminal):**
+**Sin usar la terminal:**
 
-1. Entra en [github.com](https://github.com) → botón verde **New** → crea un repositorio, por ejemplo `horas`. Puede ser público o privado (con privado también funciona GitHub Pages).
-2. Dentro del repo, botón **Add file → Upload files**. Arrastra *todos* los archivos y carpetas de esta entrega (`index.html`, `style.css`, `app.js`, `data.js`, `manifest.json`, `sw.js`, la carpeta `fonts` y la carpeta `icons`) manteniendo la misma estructura. Confirma con **Commit changes**.
-3. Ve a **Settings → Pages**. En "Build and deployment" elige **Deploy from a branch**, rama `main`, carpeta `/ (root)`. Guarda.
-4. Espera 1-2 minutos. GitHub te dará la URL, algo como `https://tu-usuario.github.io/horas/`.
+1. En [github.com](https://github.com), botón verde **New** → crea el repositorio, por ejemplo `horas`. Público o privado, los dos valen.
+2. **Add file → Upload files**. Arrastra todos los archivos y las carpetas `fonts` e `icons` manteniendo la estructura. **Commit changes**.
+3. **Settings → Pages** → "Build and deployment" → **Deploy from a branch**, rama `main`, carpeta `/ (root)`. Guardar.
+4. En 1-2 minutos tendrás la URL: `https://tu-usuario.github.io/horas/`.
 
-**Opción con git (si lo usas normalmente):**
+**Con git:**
 
 ```bash
 git init
@@ -22,39 +22,48 @@ git remote add origin https://github.com/TU-USUARIO/horas.git
 git push -u origin main
 ```
 
-Luego activa Pages igual que en el paso 3 de arriba.
+Después activa Pages igual que en el paso 3.
 
 ## Instalar en el móvil
 
-Abre la URL de GitHub Pages en el navegador del móvil.
+Abre la URL en el navegador del móvil.
 
-- **Android (Chrome):** aparecerá un aviso para "Instalar app" o "Añadir a pantalla de inicio"; si no aparece, toca el menú (⋮) → **Instalar aplicación**.
-- **iPhone (Safari):** toca el icono de compartir (□↑) → **Añadir a pantalla de inicio**.
+- **Android (Chrome):** aparece el aviso "Instalar aplicación", o desde el menú ⋮ → **Instalar aplicación**. La app también muestra un botón "Instalar en el móvil" en la portada cuando el navegador lo permite.
+- **iPhone (Safari):** icono de compartir (□↑) → **Añadir a pantalla de inicio**.
 
-Una vez instalada, abre y cierra la app con conexión al menos una vez para que quede guardada offline; después funcionará sin datos ni wifi.
+Ábrela una vez con conexión para que se guarde entera; a partir de ahí funciona sin datos ni wifi.
 
-## Qué ha cambiado respecto a la versión anterior
+## Qué hace la app
 
-- Rediseño completo con tu sistema visual "Tinta de noche" (papel, tinta, acero y burdeos) y tipografía Cardo, en vez del tema oscuro anterior.
-- App instalable de verdad: `manifest.json` + service worker, con iconos propios. Antes solo tenía metaetiquetas sueltas y no se podía instalar como app offline.
-- Funciona sin conexión desde la primera visita en adelante (todo el contenido, tipografías e iconos quedan cacheados).
-- Índice deslizable (☰) para saltar directamente a cualquier oración, oficio de Completas o parte de la Misa sin hacer scroll.
-- Modo claro/oscuro y control de tamaño de letra, con preferencia recordada.
-- "Continuar donde lo dejaste": si sales a mitad de una oración, la portada te ofrece retomarla en el mismo punto.
-- Peso mucho menor: las tipografías van en 3 archivos `.woff2` recortados a los caracteres que realmente usas (antes iban incrustadas en base64 dentro del propio HTML, ~180 KB solo de fuente).
-- Mismo contenido exacto de tus oraciones, Completas (las 7 variantes semanales) y la explicación de la Misa: no se ha tocado ni un texto, solo la presentación.
+- **Tres momentos**: Mañana (8 oraciones), Completas con las siete variantes de la semana (la del día se abre sola) y la Misa explicada en 14 partes.
+- **Entender**: el botón ¶ despliega, junto a cada parte, qué es y de dónde viene lo que se está rezando.
+- **Ahora**: la portada marca el momento que toca según la hora del día.
+- **Continuar**: si sales a mitad de una oración, la portada te ofrece volver al punto exacto.
+- **Índice deslizable** con la parte actual resaltada mientras lees, y salto directo a otro momento del día sin pasar por la portada.
+- **Tres temas** (papel, sepia y noche) y tamaño de letra ajustable, con la preferencia recordada.
+- **Pantalla siempre encendida** mientras rezas, si el móvil lo permite.
+- **Sin conexión**: todo el contenido, las tipografías y los iconos quedan guardados en el móvil.
+- El botón atrás de Android cierra el índice o vuelve a la portada, no sale de la app.
 
-## Estructura de archivos
+## Diseño
+
+Sistema visual propio: papel `#F7F5F0`, tinta `#16233A` y burdeos `#6B2735`. Cardo para todo lo que se reza, IBM Plex Sans para la interfaz (rótulos, botones, datos). Los versos van con sangría francesa: si una línea no cabe en el ancho del móvil, su continuación queda entrada en vez de parecer un verso nuevo.
+
+Las tipografías van recortadas a los caracteres que realmente usa el devocionario: 84 KB las seis fuentes juntas.
+
+## Estructura
 
 ```
-index.html      página principal
-style.css       estilos
-app.js          lógica de la app
-data.js         tus oraciones, Completas y la Misa (contenido)
+index.html      estructura de la app
+style.css       sistema visual y componentes
+app.js          lógica: navegación, índice, ajustes, progreso
+data.js         el contenido: oraciones, Completas y la Misa
 manifest.json   metadatos de instalación
 sw.js           service worker (caché offline)
-fonts/          Cardo (regular, cursiva, negrita) en woff2
+fonts/          Cardo (3) e IBM Plex Sans (3), en woff2 recortado
 icons/          iconos de la app
 ```
 
-Para cambiar cualquier texto de las oraciones, edita `data.js` (es JSON: busca el título y modifica el campo `"c"` para el texto de la oración o `"r"` para la explicación).
+Para cambiar un texto, edita `data.js`: es JSON, cada parte tiene `n` (número), `t` (título), `c` (lo que se reza) y `r` (la explicación). Si añades o quitas partes no hace falta tocar nada más; el índice y los tiempos se calculan solos.
+
+Al subir cambios, sube también el número de versión en la primera línea de `sw.js` (`horas-v3` → `horas-v4`) para que los móviles ya instalados recojan la versión nueva.
