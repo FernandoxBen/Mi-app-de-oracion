@@ -1,6 +1,15 @@
 # Horas · Devocionario
 
-App de oración personal (PWA): ofrecimiento de la mañana, Completas de cada día de la semana y la Misa explicada paso a paso. Se instala en el móvil como una app normal y funciona sin conexión.
+Devocionario católico personal (PWA): ofrecimiento de la mañana, Completas de cada día de la semana y la Santa Misa explicada paso a paso. Se instala en el móvil como una app normal y funciona sin conexión.
+
+## Versión 2.0
+
+- Nuevo icono católico sencillo: una cruz latina moderna en marfil sobre azul noche.
+- Seguimiento diario de Mañana, Misa y Completas, guardado solo en el dispositivo.
+- Accesos directos desde el icono de la app a cada momento de oración.
+- Cambio de día corregido para sesiones largas y fechas calculadas en hora local.
+- Mejoras de accesibilidad en paneles, explicaciones y progreso de lectura.
+- Actualización más fiable de la PWA sin perder el modo sin conexión.
 
 ## Publicar en GitHub Pages
 
@@ -39,6 +48,7 @@ Abre la URL en el navegador del móvil.
 - **Entender**: el botón ¶ despliega, junto a cada parte, qué es y de dónde viene lo que se está rezando.
 - **Ahora**: la portada marca el momento que toca según la hora del día.
 - **Continuar**: si sales a mitad de una oración, la portada te ofrece volver al punto exacto.
+- **Ritmo de hoy**: permite marcar cada momento como rezado y muestra el avance del día sin rachas ni puntuaciones.
 - **Índice deslizable** con la parte actual resaltada mientras lees, y salto directo a otro momento del día sin pasar por la portada.
 - **Tres temas** (papel, sepia y noche) y tamaño de letra ajustable, con la preferencia recordada.
 - **Pantalla siempre encendida** mientras rezas, si el móvil lo permite.

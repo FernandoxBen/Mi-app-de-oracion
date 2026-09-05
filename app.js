@@ -11,7 +11,7 @@ var MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","
 var TEMAS = ["papel","sepia","noche"];
 
 var HOY = new Date();
-var CLAVE = (function(d){ var g = d.getDay(); return g === 6 ? 6 : g; })(HOY);
+var CLAVE = HOY.getDay();
 var RUB = false;
 var SECCION = null;
 var LISTA = [];
@@ -23,6 +23,12 @@ var raiz = document.documentElement;
 
 function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 function fechaLarga(d){ return cap(DIAS[d.getDay()]) + ", " + d.getDate() + " de " + MESES[d.getMonth()] + " de " + d.getFullYear(); }
+function fechaLocal(d){ return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function actualizaDia(){
+  var ahora = new Date();
+  HOY = ahora;
+  CLAVE = HOY.getDay();
+}
 
 /* ---------------------------------------------------------------- Ajustes */
 function tema(){ return raiz.getAttribute("data-theme") || "papel"; }
@@ -60,6 +66,7 @@ function cargaAjustes(){
    "atrás" del móvil cierre la hoja o el oficio en vez de salir de la app. */
 var PROF = 0;          /* entradas que hemos añadido nosotros */
 var IGNORA_POP = false;
+var FOCO_ANTERIOR = null;
 
 function apila(v){ PROF++; history.pushState({ v:v }, ""); }
 function desapila(){
@@ -75,15 +82,18 @@ function pintaHojaCerrada(){
 }
 function abreHoja(id){
   if(hojaAbierta()){ pintaHojaCerrada(); desapila(); }
+  FOCO_ANTERIOR = document.activeElement;
   $(id).classList.add("on");
   $("scrim").classList.add("on");
   document.body.style.overflow = "hidden";
   apila("hoja");
+  setTimeout(function(){ $(id).focus(); }, 30);
 }
 function cierraHojas(){
   if(!hojaAbierta()) return;
   pintaHojaCerrada();
   desapila();
+  if(FOCO_ANTERIOR && FOCO_ANTERIOR.focus) FOCO_ANTERIOR.focus();
 }
 
 /* ------------------------------------------------------------- Contenidos */
@@ -106,7 +116,7 @@ function render(lista){
            '<header class="ptit">' +
              '<span class="n">' + p.n + '</span>' +
              '<h3>' + p.t + '</h3>' +
-             '<button class="cald' + (RUB ? "" : " oculto") + '" id="cald' + i + '" aria-label="Ver explicación" onclick="HORAS.toggle(' + i + ')">¶</button>' +
+             '<button class="cald' + (RUB ? "" : " oculto") + '" id="cald' + i + '" aria-label="Ver explicación" aria-expanded="false" aria-controls="rub' + i + '" onclick="HORAS.toggle(' + i + ')">¶</button>' +
            '</header>' +
            p.c +
            '<div class="rubrica" id="rub' + i + '">' + p.r + '</div>' +
@@ -170,6 +180,7 @@ function cambia(c){
 function toggle(i){
   var abierta = $("rub" + i).classList.toggle("abierta");
   $("cald" + i).classList.toggle("abierto", abierta);
+  $("cald" + i).setAttribute("aria-expanded", abierta ? "true" : "false");
   $("parte" + i).classList.toggle("abierta", abierta);
 }
 
@@ -194,6 +205,7 @@ function rubs(){
 function titulo(c){ return c === "manana" ? "Mañana" : (c === "misa" ? "La Misa" : "Completas"); }
 
 function abrir(c, scroll){
+  actualizaDia();
   SECCION = c;
   if(c === "manana"){
     LISTA = MANANA;
@@ -222,6 +234,7 @@ function abrir(c, scroll){
   $("portada").classList.add("oculto");
   $("oficio").classList.add("on");
   $("fab").classList.add("on");
+  pintaCompletar();
   window.scrollTo(0, scroll || 0);
   barraProgreso();
   apila("oficio");
@@ -266,6 +279,7 @@ function barraProgreso(){
   var max = h.scrollHeight - h.clientHeight;
   var pct = max > 20 ? Math.min(100, Math.max(0, (window.scrollY / max) * 100)) : 0;
   $("progreso").style.width = pct + "%";
+  $("progreso").setAttribute("aria-valuenow", Math.round(pct));
 }
 function spy(){
   if(!PARTES.length) return;
@@ -313,7 +327,7 @@ function guarda(){
   if(!SECCION) return;
   try{
     localStorage.setItem("horas_pos", JSON.stringify({
-      s:SECCION, y:window.scrollY, i:ACTUAL, d:new Date().toISOString().slice(0,10)
+      s:SECCION, y:window.scrollY, i:ACTUAL, d:fechaLocal(new Date())
     }));
   }catch(e){}
 }
@@ -323,7 +337,7 @@ function revisaContinuar(){
     var raw = localStorage.getItem("horas_pos");
     if(!raw){ chip.classList.remove("on"); return; }
     var p = JSON.parse(raw);
-    if(p.d !== new Date().toISOString().slice(0,10) || p.y < 120){ chip.classList.remove("on"); return; }
+    if(p.d !== fechaLocal(new Date()) || p.y < 120){ chip.classList.remove("on"); return; }
     var lista = p.s === "manana" ? MANANA : (p.s === "misa" ? MISA : COMPLETAS[CLAVE].partes);
     var parte = lista[p.i] ? lista[p.i].t : "";
     $("continuartxt").textContent = titulo(p.s) + (parte ? " · " + parte : "");
@@ -333,24 +347,78 @@ function revisaContinuar(){
 }
 
 /* ---------------------------------------------------------------- Portada */
+function leeHechos(){
+  try{
+    var datos = JSON.parse(localStorage.getItem("horas_hechos") || "{}");
+    return datos && typeof datos === "object" ? datos : {};
+  }catch(e){ return {}; }
+}
+function hechosHoy(){
+  var todos = leeHechos(), xs = todos[fechaLocal(new Date())];
+  return Array.isArray(xs) ? xs.filter(function(x){ return ["manana","misa","completas"].indexOf(x) >= 0; }) : [];
+}
+function guardaHechos(xs){
+  try{
+    var todos = leeHechos(), hoy = fechaLocal(new Date()), claves = Object.keys(todos).sort().slice(-59);
+    var limpio = {};
+    for(var i=0;i<claves.length;i++) limpio[claves[i]] = todos[claves[i]];
+    limpio[hoy] = xs;
+    localStorage.setItem("horas_hechos", JSON.stringify(limpio));
+  }catch(e){}
+}
+function pintaRitmo(){
+  var xs = hechosHoy(), nombres = ["manana","misa","completas"];
+  $("ritmo-txt").textContent = xs.length + " de 3 momentos";
+  for(var i=0;i<nombres.length;i++){
+    var hecho = xs.indexOf(nombres[i]) >= 0;
+    $("punto-" + nombres[i]).classList.toggle("on", hecho);
+    $("hecho-" + nombres[i]).hidden = !hecho;
+  }
+}
+function pintaCompletar(){
+  if(!SECCION) return;
+  var hecho = hechosHoy().indexOf(SECCION) >= 0;
+  $("completar").classList.toggle("on", hecho);
+  $("completar").setAttribute("aria-pressed", hecho ? "true" : "false");
+  $("completar-titulo").textContent = hecho ? "Rezado hoy" : "Marcar como rezado";
+  $("completar-sub").textContent = hecho ? "Toca para desmarcar" : "Se guardará solo en este dispositivo";
+}
+function completar(){
+  if(!SECCION) return;
+  var xs = hechosHoy(), pos = xs.indexOf(SECCION);
+  if(pos >= 0) xs.splice(pos,1); else xs.push(SECCION);
+  guardaHechos(xs); pintaCompletar(); pintaRitmo();
+}
 function pintaPortada(){
+  actualizaDia();
   $("fecha").textContent = DIAS[HOY.getDay()] + " · " + HOY.getDate() + " de " + MESES[HOY.getMonth()];
   $("meta-manana").textContent = MANANA.length + " oraciones · ≈" + minutos(MANANA) + " min";
   var comp = COMPLETAS[CLAVE];
-  $("meta-completas").textContent = comp.nombre.split(" · ")[0] + " · ≈" + minutos(comp.partes) + " min";
+  var nombreComp = CLAVE === 6 ? "Sábado noche" : comp.nombre.split(" · ")[0];
+  $("meta-completas").textContent = nombreComp + " · ≈" + minutos(comp.partes) + " min";
   $("meta-misa").textContent = MISA.length + " partes explicadas";
 
   var hora = HOY.getHours();
   var ahora = hora < 12 ? "manana" : (hora < 20 ? "misa" : "completas");
+  var nombres = ["manana","misa","completas"];
+  for(var i=0;i<nombres.length;i++){
+    $("pta-" + nombres[i]).classList.remove("ahora");
+    $("badge-" + nombres[i]).hidden = true;
+  }
   $("pta-" + ahora).classList.add("ahora");
   $("badge-" + ahora).hidden = false;
+  pintaRitmo();
 }
 
 /* -------------------------------------------------- Pantalla siempre encendida */
 var wakeLock = null, wakeOn = false;
 function soportaWake(){ return "wakeLock" in navigator; }
 async function pideWake(){
-  try{ wakeLock = await navigator.wakeLock.request("screen"); }
+  if(wakeLock && !wakeLock.released) return;
+  try{
+    wakeLock = await navigator.wakeLock.request("screen");
+    wakeLock.addEventListener("release", function(){ wakeLock = null; });
+  }
   catch(e){ wakeOn = false; pintaPalanca(); }
 }
 function pintaPalanca(){
@@ -446,5 +514,7 @@ pintaPortada();
 revisaContinuar();
 iniciaWake();
 
-window.HORAS = { abrir:abrir, volver:volver, toggle:toggle, rubs:rubs, irA:irA, instalar:instalar, cambia:cambia };
+window.HORAS = { abrir:abrir, volver:volver, toggle:toggle, rubs:rubs, irA:irA, instalar:instalar, cambia:cambia, completar:completar };
+var acceso = new URLSearchParams(location.search).get("abrir");
+if(["manana","completas","misa"].indexOf(acceso) >= 0) setTimeout(function(){ abrir(acceso); }, 0);
 })();
