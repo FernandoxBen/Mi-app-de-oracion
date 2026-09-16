@@ -2,7 +2,21 @@
 
 Devocionario católico personal (PWA): ofrecimiento de la mañana, Completas de cada día de la semana y la Santa Misa explicada paso a paso. Se instala en el móvil como una app normal y funciona sin conexión.
 
-## Versión 2.0
+## Versión 2.1 · experiencia móvil
+
+- Nueva interfaz marfil e índigo, con cruz latina sencilla e iconos opacos.
+- Navegación inferior: Hoy, Oraciones y Ajustes.
+- Biblioteca con búsqueda sin tildes y favoritos persistentes por oración y formulario.
+- Índice siempre visible durante la lectura, con anterior y siguiente.
+- Selección del formulario semanal de Completas, controles amplios y paneles accesibles.
+- Se conservan preferencias, seguimiento diario y posición de lectura. La guía de Misa se marca como leída.
+- Los textos de oración de la versión publicada no se han modificado. Completas sigue siendo un devocionario personal, no una edición oficial íntegra verificada.
+
+Los cambios del borrador editorial local anterior se conservan en su carpeta original y no forman parte de esta publicación.
+
+Comprobación de los flujos móviles: `node tests/mobile.cjs` (requiere Playwright). Generación de iconos: `node scripts/build-icons.cjs` (requiere Sharp).
+
+## Versión 2.0 · anterior
 
 - Nuevo icono católico sencillo: una cruz latina moderna en marfil sobre azul noche.
 - Seguimiento diario de Mañana, Misa y Completas, guardado solo en el dispositivo.
@@ -57,7 +71,7 @@ Abre la URL en el navegador del móvil.
 
 ## Diseño
 
-Sistema visual propio: papel `#F7F5F0`, tinta `#16233A` y burdeos `#6B2735`. Cardo para todo lo que se reza, IBM Plex Sans para la interfaz (rótulos, botones, datos). Los versos van con sangría francesa: si una línea no cabe en el ancho del móvil, su continuación queda entrada en vez de parecer un verso nuevo.
+Interfaz móvil en marfil `#F6F5F1` e índigo `#514887`, con icono en `#393354`. Cardo para todo lo que se reza, IBM Plex Sans para la interfaz (rótulos, botones, datos). Los versos van con sangría francesa: si una línea no cabe en el ancho del móvil, su continuación queda entrada en vez de parecer un verso nuevo.
 
 Las tipografías van recortadas a los caracteres que realmente usa el devocionario: 84 KB las seis fuentes juntas.
 
@@ -66,6 +80,7 @@ Las tipografías van recortadas a los caracteres que realmente usa el devocionar
 ```
 index.html      estructura de la app
 style.css       sistema visual y componentes
+mobile.css      interfaz móvil, biblioteca y controles de lectura
 app.js          lógica: navegación, índice, ajustes, progreso
 data.js         el contenido: oraciones, Completas y la Misa
 manifest.json   metadatos de instalación

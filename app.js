@@ -12,6 +12,9 @@ var TEMAS = ["papel","sepia","noche"];
 
 var HOY = new Date();
 var CLAVE = HOY.getDay();
+var DIA_ELEGIDO = CLAVE;
+var VISTA = "hoy";
+var SOLO_FAVORITOS = false;
 var RUB = false;
 var SECCION = null;
 var LISTA = [];
@@ -39,7 +42,7 @@ function ponTema(t){
   var botones = document.querySelectorAll(".tema");
   for(var i=0;i<botones.length;i++) botones[i].classList.toggle("sel", botones[i].getAttribute("data-t") === t);
   var meta = document.querySelector('meta[name="theme-color"]');
-  var color = t === "noche" ? "#10161E" : (t === "sepia" ? "#F2E9D8" : "#F7F5F0");
+  var color = t === "noche" ? "#171923" : (t === "sepia" ? "#F2E9D8" : "#f6f5f1");
   var metas = document.querySelectorAll('meta[name="theme-color"]');
   for(var j=0;j<metas.length;j++) metas[j].setAttribute("content", color);
   if(meta) meta.setAttribute("content", color);
@@ -79,6 +82,7 @@ function pintaHojaCerrada(){
   for(var i=0;i<hs.length;i++) hs[i].classList.remove("on");
   $("scrim").classList.remove("on");
   document.body.style.overflow = "";
+  document.querySelectorAll('#portada,#biblioteca,#oficio,#home-nav,#reader-nav').forEach(function(el){el.inert=false;});
 }
 function abreHoja(id){
   if(hojaAbierta()){ pintaHojaCerrada(); desapila(); }
@@ -86,6 +90,7 @@ function abreHoja(id){
   $(id).classList.add("on");
   $("scrim").classList.add("on");
   document.body.style.overflow = "hidden";
+  document.querySelectorAll('#portada,#biblioteca,#oficio,#home-nav,#reader-nav').forEach(function(el){el.inert=true;});
   apila("hoja");
   setTimeout(function(){ $(id).focus(); }, 30);
 }
@@ -116,6 +121,7 @@ function render(lista){
            '<header class="ptit">' +
              '<span class="n">' + p.n + '</span>' +
              '<h3>' + p.t + '</h3>' +
+             '<button class="bookmark" aria-label="' + (esFavorito(claveParte(i)) ? 'Quitar de favoritos' : 'Guardar en favoritos') + '" aria-pressed="' + esFavorito(claveParte(i)) + '" onclick="HORAS.favorito(' + i + ',this)">' + (esFavorito(claveParte(i)) ? '★' : '☆') + '</button>' +
              '<button class="cald' + (RUB ? "" : " oculto") + '" id="cald' + i + '" aria-label="Ver explicación" aria-expanded="false" aria-controls="rub' + i + '" onclick="HORAS.toggle(' + i + ')">¶</button>' +
            '</header>' +
            p.c +
@@ -188,6 +194,7 @@ function rubs(){
   RUB = !RUB;
   var bt = $("rt");
   bt.classList.toggle("on", RUB);
+  bt.setAttribute("aria-pressed", RUB);
   bt.innerHTML = '<span>¶</span> ' + (RUB ? "Ocultar" : "Entender");
   var cs = document.querySelectorAll(".cald");
   for(var i=0;i<cs.length;i++) cs[i].classList.toggle("oculto", !RUB);
@@ -195,7 +202,7 @@ function rubs(){
     var rs = document.querySelectorAll(".rubrica.abierta");
     for(var j=0;j<rs.length;j++) rs[j].classList.remove("abierta");
     var ab = document.querySelectorAll(".cald.abierto");
-    for(var k=0;k<ab.length;k++) ab[k].classList.remove("abierto");
+    for(var k=0;k<ab.length;k++){ab[k].classList.remove("abierto");ab[k].setAttribute("aria-expanded","false");}
     var ps = document.querySelectorAll(".parte.abierta");
     for(var m=0;m<ps.length;m++) ps[m].classList.remove("abierta");
   }
@@ -204,8 +211,12 @@ function rubs(){
 /* -------------------------------------------------------------- Navegación */
 function titulo(c){ return c === "manana" ? "Mañana" : (c === "misa" ? "La Misa" : "Completas"); }
 
-function abrir(c, scroll){
+function abrir(c, scroll, dia){
+  if(["manana","misa","completas"].indexOf(c)<0)return;
+  var estabaLeyendo = !!SECCION;
+  if(estabaLeyendo)guarda();
   actualizaDia();
+  DIA_ELEGIDO = Number.isInteger(dia) && dia>=0 && dia<=6 ? dia : CLAVE;
   SECCION = c;
   if(c === "manana"){
     LISTA = MANANA;
@@ -218,10 +229,10 @@ function abrir(c, scroll){
     $("onombre").textContent = "La Misa";
     $("osub").textContent = "Explicación de cada parte, paso a paso";
   }else{
-    LISTA = COMPLETAS[CLAVE].partes;
+    LISTA = COMPLETAS[DIA_ELEGIDO].partes;
     $("odia").textContent = fechaLarga(HOY);
     $("onombre").textContent = "Completas";
-    $("osub").textContent = COMPLETAS[CLAVE].nombre;
+    $("osub").textContent = COMPLETAS[DIA_ELEGIDO].nombre;
   }
   $("ttitulo").textContent = titulo(c);
   $("tspy").textContent = LISTA.length + " partes · ≈" + minutos(LISTA) + " min";
@@ -232,12 +243,19 @@ function abrir(c, scroll){
   ACTUAL = -1;
 
   $("portada").classList.add("oculto");
+  $("biblioteca").hidden = true;
+  $("home-nav").hidden = true;
+  $("reader-nav").hidden = false;
+  $("day-picker").hidden = c !== "completas";
+  $("dia-completas").value = DIA_ELEGIDO;
+  $("reading-context").textContent = c === "completas" ? "Devocionario personal. Estos textos no constituyen una edición oficial íntegra de la Liturgia de las Horas." : (c === "misa" ? "Guía para comprender la celebración. Marcarla como leída no registra tu asistencia a Misa." : "Oraciones para ofrecer el día a Dios.");
   $("oficio").classList.add("on");
   $("fab").classList.add("on");
   pintaCompletar();
-  window.scrollTo(0, scroll || 0);
+  window.scrollTo({top:scroll || 0,behavior:"instant"});
   barraProgreso();
-  apila("oficio");
+  spy();
+  if(!estabaLeyendo)apila("oficio");
 }
 
 function volverInterno(){
@@ -248,9 +266,11 @@ function volverInterno(){
   RUB = false;
   var bt = $("rt");
   bt.classList.remove("on");
+  bt.setAttribute("aria-pressed","false");
   bt.innerHTML = '<span>¶</span> Entender';
   SECCION = null;
-  window.scrollTo(0, 0);
+  pintaVista();
+  window.scrollTo({top:0,behavior:"instant"});
   revisaContinuar();
 }
 
@@ -270,7 +290,8 @@ window.addEventListener("popstate", function(){
   if(IGNORA_POP){ IGNORA_POP = false; return; }   /* cierre iniciado por nosotros */
   if(PROF > 0) PROF--;
   if(hojaAbierta()){ pintaHojaCerrada(); return; }
-  if(SECCION) volverInterno();
+  if(SECCION){ volverInterno(); return; }
+  if(VISTA!=="hoy"){VISTA="hoy";pintaVista();}
 });
 
 /* ----------------------------------------------------------- Scroll y spy */
@@ -289,19 +310,20 @@ function spy(){
   }
   if(idx === ACTUAL) return;
   ACTUAL = idx;
+  $("parte-anterior").disabled = idx <= 0;
+  $("parte-siguiente").disabled = idx >= PARTES.length - 1;
   var p = LISTA[idx];
   if(p) $("tspy").textContent = p.n + " · " + p.t;
   var enlaces = document.querySelectorAll("#indlista a");
   for(i=0;i<enlaces.length;i++) enlaces[i].classList.toggle("actual", +enlaces[i].getAttribute("data-i") === idx);
 }
-/* El botón de índice se aparta al bajar y vuelve al subir */
+/* The reading toolbar stays within reach while scrolling. */
 var yPrev = 0;
 function fab(){
   var y = window.scrollY;
   if(!SECCION){ yPrev = y; return; }
   var baja = y > yPrev + 8, sube = y < yPrev - 8;
-  if(baja && y > 260) $("fab").classList.add("esconde");
-  else if(sube) $("fab").classList.remove("esconde");
+  $("fab").classList.remove("esconde");
   if(baja || sube) yPrev = y;
 }
 
@@ -327,7 +349,7 @@ function guarda(){
   if(!SECCION) return;
   try{
     localStorage.setItem("horas_pos", JSON.stringify({
-      s:SECCION, y:window.scrollY, i:ACTUAL, d:fechaLocal(new Date())
+      s:SECCION, y:window.scrollY, i:ACTUAL, d:fechaLocal(new Date()), dia:DIA_ELEGIDO
     }));
   }catch(e){}
 }
@@ -337,12 +359,14 @@ function revisaContinuar(){
     var raw = localStorage.getItem("horas_pos");
     if(!raw){ chip.classList.remove("on"); return; }
     var p = JSON.parse(raw);
+    if(["manana","misa","completas"].indexOf(p.s)<0){chip.classList.remove("on");return;}
     if(p.d !== fechaLocal(new Date()) || p.y < 120){ chip.classList.remove("on"); return; }
-    var lista = p.s === "manana" ? MANANA : (p.s === "misa" ? MISA : COMPLETAS[CLAVE].partes);
+    var dia = Number.isInteger(p.dia) && p.dia>=0 && p.dia<=6 ? p.dia : CLAVE;
+    var lista = p.s === "manana" ? MANANA : (p.s === "misa" ? MISA : COMPLETAS[dia].partes);
     var parte = lista[p.i] ? lista[p.i].t : "";
     $("continuartxt").textContent = titulo(p.s) + (parte ? " · " + parte : "");
     chip.classList.add("on");
-    chip.onclick = function(){ abrir(p.s, p.y); };
+    chip.onclick = function(){ abrir(p.s, p.y, dia); };
   }catch(e){ chip.classList.remove("on"); }
 }
 
@@ -377,14 +401,16 @@ function pintaRitmo(){
 }
 function pintaCompletar(){
   if(!SECCION) return;
+  $("completar").hidden = SECCION === "completas" && DIA_ELEGIDO !== CLAVE;
   var hecho = hechosHoy().indexOf(SECCION) >= 0;
   $("completar").classList.toggle("on", hecho);
   $("completar").setAttribute("aria-pressed", hecho ? "true" : "false");
-  $("completar-titulo").textContent = hecho ? "Rezado hoy" : "Marcar como rezado";
+  $("completar-titulo").textContent = SECCION === "misa" ? (hecho ? "Guía leída hoy" : "Marcar como leída") : (hecho ? "Rezado hoy" : "Marcar como rezado");
   $("completar-sub").textContent = hecho ? "Toca para desmarcar" : "Se guardará solo en este dispositivo";
 }
 function completar(){
   if(!SECCION) return;
+  if(SECCION === "completas" && DIA_ELEGIDO !== CLAVE)return;
   var xs = hechosHoy(), pos = xs.indexOf(SECCION);
   if(pos >= 0) xs.splice(pos,1); else xs.push(SECCION);
   guardaHechos(xs); pintaCompletar(); pintaRitmo();
@@ -471,6 +497,13 @@ for(var w=0;w<temas.length;w++) temas[w].addEventListener("click", function(){ p
 $("fmenos").addEventListener("click", function(){ ponEscala(escala() - 0.05); });
 $("fmas").addEventListener("click", function(){ ponEscala(escala() + 0.05); });
 document.addEventListener("keydown", function(e){ if(e.key === "Escape" && hojaAbierta()) cierraHojas(); });
+document.addEventListener("keydown",function(e){
+  var hoja=hojaAbierta();if(!hoja||e.key!=="Tab")return;
+  var xs=Array.from(hoja.querySelectorAll('button,a,input,select')).filter(function(x){return !x.disabled && x.getClientRects().length;});
+  var first=xs[0],last=xs[xs.length-1];if(!first)return;
+  if(e.shiftKey&&(document.activeElement===first||document.activeElement===hoja)){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===hoja)){e.preventDefault();first.focus();}
+});
 
 /* Arrastrar la hoja hacia abajo para cerrarla */
 (function(){
@@ -480,7 +513,7 @@ document.addEventListener("keydown", function(e){ if(e.key === "Escape" && hojaA
       var y0 = null;
       hoja.addEventListener("touchstart", function(e){
         var cuerpo = hoja.querySelector(".hcuerpo");
-        if(cuerpo.scrollTop > 0 && cuerpo.contains(e.target)) return;
+        if(!e.target.closest('.asa,.hcab') || e.target.closest('button')) return;
         y0 = e.touches[0].clientY;
       }, { passive:true });
       hoja.addEventListener("touchmove", function(e){
@@ -509,12 +542,61 @@ if("serviceWorker" in navigator){
 
 $("ttitulo").addEventListener("click", function(){ window.scrollTo({ top:0, behavior:"smooth" }); });
 
+/* Navigation and local bookmarks reuse the existing prayers and storage. */
+function pintaVista(){
+  $("portada").classList.toggle("oculto",VISTA!=="hoy");
+  $("biblioteca").hidden=VISTA!=="oraciones";
+  $("home-nav").hidden=false;$("reader-nav").hidden=true;
+  ["hoy","oraciones"].forEach(function(v){if(v===VISTA)$("nav-"+v).setAttribute("aria-current","page");else $("nav-"+v).removeAttribute("aria-current");});
+  if(VISTA==="oraciones")pintaBiblioteca();else{pintaPortada();revisaContinuar();}
+}
+function cambiaVista(v){
+  if(v===VISTA)return;
+  VISTA=v;pintaVista();window.scrollTo({top:0,behavior:"instant"});
+  if(v==="oraciones")apila("biblioteca");else desapila();
+}
+function favoritos(){try{var f=JSON.parse(localStorage.getItem("horas_favoritos")||"[]");return Array.isArray(f)?f.filter(function(k){return typeof k==="string";}):[];}catch(e){return [];}}
+function claveParte(i){return SECCION+":"+(SECCION==="completas"?DIA_ELEGIDO+":":"")+i;}
+function esFavorito(k){return favoritos().indexOf(k)>=0;}
+function favorito(i,btn){
+  var f=favoritos(),k=claveParte(i),pos=f.indexOf(k);if(pos>=0)f.splice(pos,1);else f.push(k);
+  try{localStorage.setItem("horas_favoritos",JSON.stringify(f));}catch(e){return;}
+  btn.setAttribute("aria-pressed",pos<0);btn.setAttribute("aria-label",pos<0?"Quitar de favoritos":"Guardar en favoritos");btn.textContent=pos<0?"★":"☆";
+}
+function normaliza(s){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
+function pintaBiblioteca(){
+  var q=normaliza($("buscar").value.trim()),n=0,cont=$("resultados");cont.replaceChildren();
+  $("limpiar-busqueda").hidden=!q;
+  var grupos=[{s:"manana",d:null,l:MANANA},{s:"misa",d:null,l:MISA}];
+  Object.keys(COMPLETAS).forEach(function(d){if(q||SOLO_FAVORITOS||+d===CLAVE)grupos.push({s:"completas",d:+d,l:COMPLETAS[d].partes});});
+  grupos.forEach(function(g){g.l.forEach(function(p,i){
+    var key=g.s+":"+(g.d===null?"":g.d+":")+i;
+    if(SOLO_FAVORITOS&&!esFavorito(key))return;
+    if(q&&normaliza(p.t+" "+p.c.replace(/<[^>]*>/g," ")).indexOf(q)<0)return;
+    n++;var b=document.createElement("button"),tx=document.createElement("span"),sm=document.createElement("small"),arr=document.createElement("span");
+    b.className="result";tx.textContent=p.t;sm.textContent=titulo(g.s)+(g.d===null?"":" · "+cap(DIAS[g.d]));arr.className="result-arrow";arr.textContent=esFavorito(key)?"★":"→";arr.setAttribute("aria-hidden","true");tx.appendChild(sm);b.append(tx,arr);
+    b.onclick=function(){abrir(g.s,0,g.d);requestAnimationFrame(function(){ $("parte"+i).scrollIntoView({block:"start",behavior:"instant"});spy(); });};cont.appendChild(b);
+  });});
+  $("resultado-cuenta").textContent=n+ (n===1?" oración":" oraciones")+(SOLO_FAVORITOS?" guardadas":"");
+  if(!n){var empty=document.createElement("p");empty.className="empty";empty.textContent=SOLO_FAVORITOS?"Tus oraciones favoritas aparecerán aquí. Toca la estrella junto al título de una oración para guardarla.":"No encontramos esa oración. Prueba con otra palabra.";cont.appendChild(empty);}
+}
+$("nav-hoy").onclick=function(){cambiaVista("hoy");};
+$("nav-oraciones").onclick=function(){cambiaVista("oraciones");};
+$("nav-ajustes").onclick=function(){abreHoja("hojaajustes");};
+$("buscar").oninput=pintaBiblioteca;
+$("limpiar-busqueda").onclick=function(){$("buscar").value="";pintaBiblioteca();$("buscar").focus();};
+["todas","favoritos"].forEach(function(f){$("filtro-"+f).onclick=function(){SOLO_FAVORITOS=f==="favoritos";$("filtro-todas").setAttribute("aria-pressed",!SOLO_FAVORITOS);$("filtro-favoritos").setAttribute("aria-pressed",SOLO_FAVORITOS);pintaBiblioteca();};});
+$("dia-completas").onchange=function(){abrir("completas",0,+this.value);};
+$("parte-anterior").onclick=function(){var i=Math.max(0,ACTUAL-1);if(PARTES[i])PARTES[i].scrollIntoView({behavior:"smooth",block:"start"});};
+$("parte-siguiente").onclick=function(){var i=Math.min(PARTES.length-1,ACTUAL+1);if(PARTES[i])PARTES[i].scrollIntoView({behavior:"smooth",block:"start"});};
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&!SECCION){actualizaDia();pintaVista();}});
+
 cargaAjustes();
 pintaPortada();
 revisaContinuar();
 iniciaWake();
 
-window.HORAS = { abrir:abrir, volver:volver, toggle:toggle, rubs:rubs, irA:irA, instalar:instalar, cambia:cambia, completar:completar };
+window.HORAS = { abrir:abrir, volver:volver, toggle:toggle, rubs:rubs, irA:irA, instalar:instalar, cambia:cambia, completar:completar, favorito:favorito };
 var acceso = new URLSearchParams(location.search).get("abrir");
 if(["manana","completas","misa"].indexOf(acceso) >= 0) setTimeout(function(){ abrir(acceso); }, 0);
 })();

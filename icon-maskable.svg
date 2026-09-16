@@ -1,8 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#1B2A41"/>
-  <rect x="256" y="256" r="0" width="0" height="0"/>
-  <g transform="translate(256,256) scale(0.62) translate(-256,-256)">
-    <rect x="234" y="120" width="44" height="272" rx="4" fill="#F4EFE4"/>
-    <rect x="150" y="196" width="212" height="44" rx="4" fill="#F4EFE4"/>
-  </g>
+  <title>Horas · Cruz</title>
+  <rect width="512" height="512" fill="#393354"/>
+  <path d="M238 116Q238 108 246 108H266Q274 108 274 116V202H350Q358 202 358 210V230Q358 238 350 238H274V396Q274 404 266 404H246Q238 404 238 396V238H162Q154 238 154 230V210Q154 202 162 202H238Z" fill="#f3eefc"/>
 </svg>

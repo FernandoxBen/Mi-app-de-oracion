@@ -1,10 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#16233A"/>
-  <g fill="none" stroke="#F7F5F0" stroke-opacity=".34" stroke-width="13">
-    <path d="M132 404V244a124 124 0 0 1 248 0v160"/>
-    <path d="M170 404V250a86 86 0 0 1 172 0v154"/>
-  </g>
-  <rect x="238" y="150" width="36" height="250" rx="5" fill="#F7F5F0"/>
-  <rect x="182" y="232" width="148" height="36" rx="5" fill="#F7F5F0"/>
-  <rect x="110" y="398" width="292" height="12" rx="6" fill="#F7F5F0" fill-opacity=".55"/>
+  <title>Horas · Cruz</title>
+  <rect width="512" height="512" fill="#393354"/>
+  <path d="M238 116Q238 108 246 108H266Q274 108 274 116V202H350Q358 202 358 210V230Q358 238 350 238H274V396Q274 404 266 404H246Q238 404 238 396V238H162Q154 238 154 230V210Q154 202 162 202H238Z" fill="#f3eefc"/>
 </svg>

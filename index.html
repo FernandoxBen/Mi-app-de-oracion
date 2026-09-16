@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#10161E" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171923" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Devocionario: ofrecimiento de la mañana, Completas de cada día y la Misa explicada paso a paso.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -17,6 +17,7 @@
 <link rel="preload" href="fonts/Cardo-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/PlexSans-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="mobile.css">
 </head>
 <body>
 <a class="skip" href="#portada">Saltar al contenido</a>
@@ -25,7 +26,7 @@
 <div id="portada"><div class="wrap">
 
   <div class="topline">
-    <span class="marca">Horas</span>
+    <span class="marca"><img src="icons/icon.svg" alt=""><span>Horas<small>DEVOCIONARIO CATÓLICO</small></span></span>
     <button class="ibtn" id="bajustes1" aria-label="Ajustes">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
     </button>
@@ -36,8 +37,8 @@
     <svg class="arco" viewBox="0 0 100 100" aria-hidden="true">
       <path class="c" d="M46 12h8v25h20v8H54v43h-8V45H26v-8h20Z"/>
     </svg>
-    <h1>Horas</h1>
-    <p class="lema">Rezar con la Iglesia.<br>Vivir el día en presencia de Dios.</p>
+    <h1>Un momento<br>para Dios.</h1>
+    <p class="lema">Tu oración, a lo largo del día.</p>
     <div class="fleuron"><i></i><b></b><i></i></div>
   </div>
 
@@ -86,6 +87,8 @@
     </button>
   </div>
 
+  <p class="home-note">Empieza por donde estés. Puedes retomar tu lectura cuando quieras.</p>
+
   <div class="pfoot">
     <span class="lema">Ad maiorem Dei gloriam</span>
     <button class="instalar" id="instalar" onclick="HORAS.instalar()">
@@ -95,6 +98,19 @@
   </div>
 
 </div></div>
+
+<section id="biblioteca" hidden><div class="wrap">
+  <div class="library-heading"><span class="eyebrow">TU DEVOCIONARIO</span><h1>Oraciones</h1><p>Encuentra tu oración y guárdala a mano.</p></div>
+  <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="buscar" type="search" placeholder="Buscar una oración…" aria-label="Buscar una oración"><button id="limpiar-busqueda" aria-label="Borrar búsqueda" hidden>×</button></label>
+  <div class="library-filters" aria-label="Filtrar oraciones"><button id="filtro-todas" aria-pressed="true">Todas</button><button id="filtro-favoritos" aria-pressed="false">☆ Favoritos</button></div>
+  <p id="resultado-cuenta" role="status"></p><div id="resultados"></div>
+</div></section>
+
+<nav class="home-nav" id="home-nav" aria-label="Navegación principal">
+  <button id="nav-hoy" aria-current="page"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9M10 21v-7h4v7"/></svg><span>Hoy</span></button>
+  <button id="nav-oraciones"><svg viewBox="0 0 24 24"><path d="M12 5v16M12 5C8 2 4 3 2 4v15c3-1 6-1 10 2 4-3 7-3 10-2V4c-2-1-6-2-10 1Z"/></svg><span>Oraciones</span></button>
+  <button id="nav-ajustes"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><span>Ajustes</span></button>
+</nav>
 
 <!-- ============================ OFICIO ============================ -->
 <div id="oficio">
@@ -108,7 +124,7 @@
         <button class="ibtn" id="bajustes2" aria-label="Ajustes">
           <svg viewBox="0 0 24 24"><path d="M4 8h9"/><path d="M17 8h3"/><circle cx="15" cy="8" r="2.1"/><path d="M4 16h3"/><path d="M11 16h9"/><circle cx="9" cy="16" r="2.1"/></svg>
         </button>
-        <button class="chip" id="rt" onclick="HORAS.rubs()"><span>¶</span> Entender</button>
+        <button class="chip" id="rt" aria-pressed="false" onclick="HORAS.rubs()"><span>¶</span> Entender</button>
       </div>
     </div>
     <div class="progreso" id="progreso" role="progressbar" aria-label="Progreso de lectura" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
@@ -120,6 +136,8 @@
       <h2 id="onombre"></h2>
       <p class="sub" id="osub"></p>
     </div>
+    <div class="day-picker" id="day-picker" hidden><label for="dia-completas">Completas de</label><select id="dia-completas"><option value="0">Domingo</option><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miércoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sábado</option></select></div>
+    <p class="reading-context" id="reading-context"></p>
     <div id="cuerpo"></div>
     <button class="completar" id="completar" onclick="HORAS.completar()">
       <span class="completar-marca">✓</span><span><strong id="completar-titulo">Marcar como rezado</strong><small id="completar-sub">Se guardará solo en este dispositivo</small></span>
@@ -128,10 +146,14 @@
   </div>
 </div>
 
-<button class="fab" id="fab">
+<nav class="reader-nav" id="reader-nav" aria-label="Navegación de lectura" hidden>
+<button id="parte-anterior" aria-label="Parte anterior"><span aria-hidden="true">←</span><span>Anterior</span></button>
+<button class="fab" id="fab" aria-label="Abrir índice de la oración">
   <svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
   Índice
 </button>
+<button id="parte-siguiente" aria-label="Parte siguiente"><span aria-hidden="true">→</span><span>Siguiente</span></button>
+</nav>
 
 <!-- ============================ HOJAS ============================ -->
 <div class="scrim" id="scrim"></div>
@@ -182,6 +204,7 @@
         <button class="palanca" id="palanca-pantalla" role="switch" aria-checked="false" aria-label="Mantener la pantalla encendida"><b></b></button>
       </div>
     </div>
+    <p class="reading-context" style="margin-top:24px">Horas 2.1 · Devocionario católico<br>Tus ajustes y favoritos se guardan en este dispositivo.</p>
   </div>
 </div>
 
