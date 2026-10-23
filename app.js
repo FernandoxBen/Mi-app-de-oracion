@@ -27,6 +27,52 @@ var raiz = document.documentElement;
 function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 function fechaLarga(d){ return cap(DIAS[d.getDay()]) + ", " + d.getDate() + " de " + MESES[d.getMonth()] + " de " + d.getFullYear(); }
 function fechaLocal(d){ return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+/* La noche litúrgica: hasta las 4:00 sigue siendo la noche del día anterior. */
+function nocheDe(d){ var x = new Date(d); if(x.getHours() < 4) x.setDate(x.getDate() - 1); return x; }
+function claveNoche(){ return nocheDe(new Date()).getDay(); }
+/* Domingo de Pascua (algoritmo gregoriano) y tiempo litúrgico de una fecha. */
+function domingoPascua(y){
+  var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+      h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+  return new Date(y, Math.floor((h+l-7*m+114)/31)-1, ((h+l-7*m+114)%31)+1);
+}
+function tiempoLiturgico(fecha){
+  var d = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+  var dias = Math.round((d - domingoPascua(d.getFullYear())) / 864e5);
+  if(dias >= 0 && dias <= 49) return "pascua";      // Domingo de Pascua → Pentecostés
+  if(dias >= -46 && dias < 0) return "cuaresma";    // Miércoles de Ceniza → Sábado Santo
+  return "ordinario";
+}
+var NOMBRE_TIEMPO = { pascua:"Tiempo pascual", cuaresma:"Cuaresma", ordinario:"" };
+var ANTIFONAS = ["salve","amparo","regina"];
+function antifonaElegida(){
+  try{
+    var x = JSON.parse(localStorage.getItem("horas_antifona") || "null");
+    if(x && x.f === fechaLocal(nocheDe(new Date())) && ANTIFONAS.indexOf(x.k) >= 0) return x.k;
+  }catch(e){}
+  return tiempoLiturgico(nocheDe(new Date())) === "pascua" ? "regina" : "salve";
+}
+function aplicaAntifona(){
+  var k = antifonaElegida();
+  var bloques = document.querySelectorAll(".ant-final");
+  for(var i=0;i<bloques.length;i++){
+    bloques[i].setAttribute("data-sel", k);
+    var bs = bloques[i].querySelectorAll(".antsel button");
+    for(var j=0;j<bs.length;j++) bs[j].setAttribute("aria-pressed", bs[j].getAttribute("data-ant") === k ? "true" : "false");
+  }
+}
+function antifona(k){
+  if(ANTIFONAS.indexOf(k) < 0) return;
+  try{ localStorage.setItem("horas_antifona", JSON.stringify({ f:fechaLocal(nocheDe(new Date())), k:k })); }catch(e){}
+  aplicaAntifona();
+}
+function aplicaTiempo(){
+  var cuerpo = $("cuerpo");
+  cuerpo.classList.remove("t-pascua","t-cuaresma","t-ordinario");
+  if(SECCION !== "completas") return;
+  cuerpo.classList.add("t-" + tiempoLiturgico(nocheDe(new Date())));
+  aplicaAntifona();
+}
 function actualizaDia(){
   var ahora = new Date();
   HOY = ahora;
@@ -129,6 +175,7 @@ function render(lista){
          '</article>';
   }
   $("cuerpo").innerHTML = h;
+  aplicaTiempo();
   PARTES = [].slice.call(document.querySelectorAll(".parte"));
   versos();
 }
@@ -216,7 +263,7 @@ function abrir(c, scroll, dia){
   var estabaLeyendo = !!SECCION;
   if(estabaLeyendo)guarda();
   actualizaDia();
-  DIA_ELEGIDO = Number.isInteger(dia) && dia>=0 && dia<=6 ? dia : CLAVE;
+  DIA_ELEGIDO = Number.isInteger(dia) && dia>=0 && dia<=6 ? dia : claveNoche();
   SECCION = c;
   if(c === "manana"){
     LISTA = MANANA;
@@ -230,7 +277,8 @@ function abrir(c, scroll, dia){
     $("osub").textContent = "Explicación de cada parte, paso a paso";
   }else{
     LISTA = COMPLETAS[DIA_ELEGIDO].partes;
-    $("odia").textContent = fechaLarga(HOY);
+    var tl = NOMBRE_TIEMPO[tiempoLiturgico(nocheDe(HOY))];
+    $("odia").textContent = fechaLarga(nocheDe(HOY)) + (tl ? " · " + tl : "");
     $("onombre").textContent = "Completas";
     $("osub").textContent = COMPLETAS[DIA_ELEGIDO].nombre;
   }
@@ -248,7 +296,7 @@ function abrir(c, scroll, dia){
   $("reader-nav").hidden = false;
   $("day-picker").hidden = c !== "completas";
   $("dia-completas").value = DIA_ELEGIDO;
-  $("reading-context").textContent = c === "completas" ? "Devocionario personal. Estos textos no constituyen una edición oficial íntegra de la Liturgia de las Horas." : (c === "misa" ? "Guía para comprender la celebración. Marcarla como leída no registra tu asistencia a Misa." : "Oraciones para ofrecer el día a Dios.");
+  $("reading-context").textContent = c === "completas" ? "Sigue el Ordinario de Completas de la Liturgia de las Horas. Salmos y algunas lecturas y oraciones en traducción propia del latín; el himno es el Te lucis en castellano." : (c === "misa" ? "Guía para comprender la celebración. Marcarla como leída no registra tu asistencia a Misa." : "Oraciones para ofrecer el día a Dios.");
   $("oficio").classList.add("on");
   $("fab").classList.add("on");
   pintaCompletar();
@@ -377,13 +425,15 @@ function leeHechos(){
     return datos && typeof datos === "object" ? datos : {};
   }catch(e){ return {}; }
 }
-function hechosHoy(){
-  var todos = leeHechos(), xs = todos[fechaLocal(new Date())];
+function hechosDe(f){
+  var xs = leeHechos()[f];
   return Array.isArray(xs) ? xs.filter(function(x){ return ["manana","misa","completas"].indexOf(x) >= 0; }) : [];
 }
-function guardaHechos(xs){
+function hechosHoy(){ return hechosDe(fechaLocal(new Date())); }
+function fechaSeccion(s){ return fechaLocal(s === "completas" ? nocheDe(new Date()) : new Date()); }
+function guardaHechos(xs, fecha){
   try{
-    var todos = leeHechos(), hoy = fechaLocal(new Date()), claves = Object.keys(todos).sort().slice(-59);
+    var todos = leeHechos(), hoy = fecha || fechaLocal(new Date()), claves = Object.keys(todos).sort().slice(-59);
     var limpio = {};
     for(var i=0;i<claves.length;i++) limpio[claves[i]] = todos[claves[i]];
     limpio[hoy] = xs;
@@ -401,8 +451,8 @@ function pintaRitmo(){
 }
 function pintaCompletar(){
   if(!SECCION) return;
-  $("completar").hidden = SECCION === "completas" && DIA_ELEGIDO !== CLAVE;
-  var hecho = hechosHoy().indexOf(SECCION) >= 0;
+  $("completar").hidden = SECCION === "completas" && DIA_ELEGIDO !== claveNoche();
+  var hecho = hechosDe(fechaSeccion(SECCION)).indexOf(SECCION) >= 0;
   $("completar").classList.toggle("on", hecho);
   $("completar").setAttribute("aria-pressed", hecho ? "true" : "false");
   $("completar-titulo").textContent = SECCION === "misa" ? (hecho ? "Guía leída hoy" : "Marcar como leída") : (hecho ? "Rezado hoy" : "Marcar como rezado");
@@ -410,22 +460,22 @@ function pintaCompletar(){
 }
 function completar(){
   if(!SECCION) return;
-  if(SECCION === "completas" && DIA_ELEGIDO !== CLAVE)return;
-  var xs = hechosHoy(), pos = xs.indexOf(SECCION);
+  if(SECCION === "completas" && DIA_ELEGIDO !== claveNoche())return;
+  var f = fechaSeccion(SECCION), xs = hechosDe(f), pos = xs.indexOf(SECCION);
   if(pos >= 0) xs.splice(pos,1); else xs.push(SECCION);
-  guardaHechos(xs); pintaCompletar(); pintaRitmo();
+  guardaHechos(xs, f); pintaCompletar(); pintaRitmo();
 }
 function pintaPortada(){
   actualizaDia();
   $("fecha").textContent = DIAS[HOY.getDay()] + " · " + HOY.getDate() + " de " + MESES[HOY.getMonth()];
   $("meta-manana").textContent = MANANA.length + " oraciones · ≈" + minutos(MANANA) + " min";
-  var comp = COMPLETAS[CLAVE];
-  var nombreComp = CLAVE === 6 ? "Sábado noche" : comp.nombre.split(" · ")[0];
+  var cn = claveNoche(), comp = COMPLETAS[cn];
+  var nombreComp = cn === 6 ? "Sábado noche" : comp.nombre.split(" · ")[0];
   $("meta-completas").textContent = nombreComp + " · ≈" + minutos(comp.partes) + " min";
   $("meta-misa").textContent = MISA.length + " partes explicadas";
 
   var hora = HOY.getHours();
-  var ahora = hora < 12 ? "manana" : (hora < 20 ? "misa" : "completas");
+  var ahora = hora < 4 ? "completas" : (hora < 12 ? "manana" : (hora < 20 ? "misa" : "completas"));
   var nombres = ["manana","misa","completas"];
   for(var i=0;i<nombres.length;i++){
     $("pta-" + nombres[i]).classList.remove("ahora");
@@ -568,7 +618,7 @@ function pintaBiblioteca(){
   var q=normaliza($("buscar").value.trim()),n=0,cont=$("resultados");cont.replaceChildren();
   $("limpiar-busqueda").hidden=!q;
   var grupos=[{s:"manana",d:null,l:MANANA},{s:"misa",d:null,l:MISA}];
-  Object.keys(COMPLETAS).forEach(function(d){if(q||SOLO_FAVORITOS||+d===CLAVE)grupos.push({s:"completas",d:+d,l:COMPLETAS[d].partes});});
+  Object.keys(COMPLETAS).forEach(function(d){if(q||SOLO_FAVORITOS||+d===claveNoche())grupos.push({s:"completas",d:+d,l:COMPLETAS[d].partes});});
   grupos.forEach(function(g){g.l.forEach(function(p,i){
     var key=g.s+":"+(g.d===null?"":g.d+":")+i;
     if(SOLO_FAVORITOS&&!esFavorito(key))return;
@@ -596,7 +646,7 @@ pintaPortada();
 revisaContinuar();
 iniciaWake();
 
-window.HORAS = { abrir:abrir, volver:volver, toggle:toggle, rubs:rubs, irA:irA, instalar:instalar, cambia:cambia, completar:completar, favorito:favorito };
+window.HORAS = { abrir:abrir, volver:volver, toggle:toggle, rubs:rubs, irA:irA, instalar:instalar, cambia:cambia, completar:completar, favorito:favorito, antifona:antifona, tiempo:tiempoLiturgico, pascua:domingoPascua };
 var acceso = new URLSearchParams(location.search).get("abrir");
 if(["manana","completas","misa"].indexOf(acceso) >= 0) setTimeout(function(){ abrir(acceso); }, 0);
 })();

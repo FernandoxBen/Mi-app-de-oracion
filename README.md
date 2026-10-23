@@ -2,6 +2,30 @@
 
 Devocionario católico personal (PWA): ofrecimiento de la mañana, Completas de cada día de la semana y la Santa Misa explicada paso a paso. Se instala en el móvil como una app normal y funciona sin conexión.
 
+## Versión 2.2 · Completas según el Ordinario
+
+Completas sigue ahora el Ordinario de la Liturgia de las Horas noche a noche:
+
+| Noche | Salmos | Lectura breve | Oración |
+|---|---|---|---|
+| Sábado (Domingo, tras I Vísperas) | 4 y 133 | Dt 6, 4-7 | «Visita, Señor, esta casa…» |
+| Domingo (tras II Vísperas) | 90 | Ap 22, 4-5 | Por la resurrección celebrada hoy |
+| Lunes | 85 | 1 Ts 5, 9-10 | Descanso reparador |
+| Martes | 142, 1-11 | 1 Pe 5, 8-9 | «Ilumina, Señor Dios, nuestras tinieblas…» |
+| Miércoles | 30, 2-6 y 129 | Ef 4, 26-27 | Cristo, manso y humilde de corazón |
+| Jueves | 15 | 1 Ts 5, 23 | Repara nuestras fuerzas |
+| Viernes | 87 | Jer 14, 9 | Unidos a la sepultura de Cristo |
+
+- Seis lecturas y cinco oraciones estaban en la noche equivocada o no eran de Completas; ahora cada una está en la suya.
+- «Gloria al Padre» al final de cada salmo, conclusión del acto penitencial y responsorio breve con su forma propia.
+- Antífonas corregidas del domingo (Sal 90), lunes (Sal 85) y miércoles (Sal 30).
+- Tiempo litúrgico calculado a partir de la fecha de Pascua: sin aleluya de Miércoles de Ceniza a Sábado Santo; en tiempo pascual, aleluyas en antífonas y responsorio, y *Regina caeli*.
+- Antífona a la Virgen a elegir cada noche (Salve, Bajo tu amparo, Regina caeli); por defecto, la del tiempo.
+- Hasta las 4:00 la app sigue en la noche anterior: Completas rezadas después de medianoche son las del día que termina y cuentan para él.
+- El himno es el *Te lucis ante terminum* en castellano. Salmos, tres lecturas y cuatro oraciones son traducción propia del latín, no la versión oficial española.
+
+Comprobación: `node tests/completas.cjs` (requiere Playwright).
+
 ## Versión 2.1 · experiencia móvil
 
 - Nueva interfaz marfil e índigo, con cruz latina sencilla e iconos opacos.

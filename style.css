@@ -418,3 +418,18 @@ span.nota{display:inline;margin:0;font-size:.78em}
 .completar:active{transform:scale(.98)}.completar.on{background:var(--brand-soft);border-color:var(--brand)}
 .completar-marca{width:31px;height:31px;border:1px solid var(--brand-line);border-radius:50%;display:grid;place-items:center;color:var(--brand);font-weight:700}.completar.on .completar-marca{background:var(--brand);color:var(--surface)}
 .completar strong,.completar small{display:block;font-family:var(--sans)}.completar strong{font-size:12px;font-weight:600}.completar small{margin-top:2px;font-size:9.5px;color:var(--faint)}
+
+/* ---------------- Completas: tiempo litúrgico y antífona a la Virgen ---------------- */
+.tp{display:none}
+.t-pascua .tp{display:inline}
+.t-pascua .no-tp{display:none}
+.t-cuaresma .alel{display:none}
+.gloria p{color:var(--soft)}
+.antsel{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 18px}
+.antsel button{flex:1 1 0;min-width:0;min-height:44px;padding:0 10px;border:1px solid var(--line-2);border-radius:22px;
+  font:500 13px var(--sans);color:var(--soft);background:transparent;white-space:nowrap}
+.antsel button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--bg)}
+.antv{display:none}
+.ant-final[data-sel="salve"] .antv[data-ant="salve"],
+.ant-final[data-sel="amparo"] .antv[data-ant="amparo"],
+.ant-final[data-sel="regina"] .antv[data-ant="regina"]{display:block}

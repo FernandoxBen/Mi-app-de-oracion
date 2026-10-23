@@ -1,4 +1,4 @@
-var CACHE = "horas-v6-mobile-2.1.0";
+var CACHE = "horas-v7-completas-2.2.0";
 var ASSETS = [
   "./",
   "./index.html",

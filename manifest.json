@@ -9,7 +9,7 @@
   "background_color": "#f6f5f1",
   "theme_color": "#f6f5f1",
   "id": "./",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "lang": "es",
   "shortcuts": [
     { "name": "Oración de la mañana", "short_name": "Mañana", "url": "./?abrir=manana", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
